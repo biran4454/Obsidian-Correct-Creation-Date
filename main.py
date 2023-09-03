@@ -16,7 +16,8 @@ def changeFileCreationTime(fname, newtime, editedtime):
     winfile.close()
 
 # usage:
-# main.py [root_dir]
+# main.py (root_dir)
+# converts to bst from utc
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         root_dir = sys.argv[1]
@@ -44,11 +45,25 @@ if __name__ == '__main__':
                             edited_time = line.split('updated: ')[1].strip()
                 # change file created time
                 if created_time:
-                    created_time = time.mktime(time.strptime(created_time, '%Y-%m-%d %H:%M:%SZ'))
+                    if '{' in created_time:
+                        continue
+                    created_time = created_time.replace('T', ' ').replace('Z', '')
+                    try:
+                        created_time = time.mktime(time.strptime(created_time, '%Y-%m-%d %H:%M:%S'))
+                    except ValueError:
+                        created_time = time.mktime(time.strptime(created_time, '%Y-%m-%d %H:%M'))
                     if time.localtime(created_time).tm_isdst == 1:
                         created_time += 3600
                 if edited_time:
-                    edited_time = time.mktime(time.strptime(edited_time, '%Y-%m-%d %H:%M:%SZ'))
+                    if '{' in edited_time:
+                        continue
+                    edited_time = edited_time.replace('T', ' ').replace('Z', '')
+                    try:
+                        edited_time = time.mktime(time.strptime(edited_time, '%Y-%m-%d %H:%M:%S'))
+                    except ValueError:
+                        edited_time = time.mktime(time.strptime(edited_time, '%Y-%m-%d %H:%M'))
                     if time.localtime(edited_time).tm_isdst == 1:
                         edited_time += 3600
-                changeFileCreationTime(os.path.join(root, file), created_time, edited_time)
+                if created_time and edited_time:
+                    #print(file, created_time)
+                    changeFileCreationTime(os.path.join(root, file), created_time, edited_time)
