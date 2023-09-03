@@ -1,6 +1,6 @@
 import pywintypes, win32file, win32con
-import os, time
-import sys
+import os, sys
+import time
 def changeFileCreationTime(fname, newtime, editedtime):
     wintime = pywintypes.Time(newtime)
     editedtime = pywintypes.Time(editedtime)
@@ -11,8 +11,6 @@ def changeFileCreationTime(fname, newtime, editedtime):
         win32con.FILE_ATTRIBUTE_NORMAL, None)
 
     win32file.SetFileTime(winfile, wintime, None, editedtime)
-
-
     winfile.close()
 
 # usage:
@@ -21,6 +19,9 @@ def changeFileCreationTime(fname, newtime, editedtime):
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         root_dir = sys.argv[1]
+    elif os.path.exists('config'):
+        with open('config') as f:
+            root_dir = f.read().strip()
     else:
         root_dir = os.getcwd()
     for root, dirs, files in os.walk(root_dir):
@@ -65,5 +66,5 @@ if __name__ == '__main__':
                     if time.localtime(edited_time).tm_isdst == 1:
                         edited_time += 3600
                 if created_time and edited_time:
-                    #print(file, created_time)
-                    changeFileCreationTime(os.path.join(root, file), created_time, edited_time)
+                    print(file, created_time)
+                    #changeFileCreationTime(os.path.join(root, file), created_time, edited_time)
